@@ -48,6 +48,7 @@ export class StackedBarChart extends BaseAxisChart {
 			yMax = scales.y.yMaxAdjuster(yMax);
 		}
 
+		//console.log(yMax);
 		return yMax;
 	}
 
@@ -124,16 +125,17 @@ export class StackedBarChart extends BaseAxisChart {
 				.append("rect")
 				.classed("bar", true)
 				.attr("x", d => this.x(d.data.label))
-				.attr("y", d => this.y(d[1]))
-				.attr("height", d => this.y(d[0]) - this.y(d[1]))
+				//.attr("y", d => this.y(d[1]))
+				.attr("height", 0)
 				.attr("width", d => this.x.bandwidth())
 				.attr("fill", d => this.getFillScale()[d.datasetLabel](d.data.label))
-				.attr("opacity", 0)
-				.transition(this.getFillTransition())
-				.attr("opacity", 1)
 				.attr("stroke", d => this.options.accessibility ? this.colorScale[d.datasetLabel](d.data.label) : null)
 				.attr("stroke-width", Configuration.bars.default.strokeWidth)
-				.attr("stroke-opacity", d => this.options.accessibility ? 1 : 0);
+				.attr("stroke-opacity", d => this.options.accessibility ? 1 : 0)
+				.transition(this.getFillTransition())
+					//.delay(10)
+					.attr("y", d => this.y(d[1]))
+					.attr("height", d => this.y(d[0]) - this.y(d[1]));
 		};
 
 		const rectsToAdd = g.enter()
@@ -147,12 +149,10 @@ export class StackedBarChart extends BaseAxisChart {
 
 		g.exit()
 			.transition(this.getDefaultTransition())
-			.style("opacity", 0)
 			.remove();
 
 		rect.exit()
 			.transition(this.getDefaultTransition())
-			.style("opacity", 0)
 			.remove();
 
 		// Add slice hover actions, and clear any slice borders present
@@ -197,15 +197,18 @@ export class StackedBarChart extends BaseAxisChart {
 
 		// Update existing bars
 		rect
-			.transition(animate ? this.getFillTransition() : this.getInstantTransition())
 			.attr("x", d => this.x(d.data.label))
 			.attr("y", d => this.y(d[1]))
-			.attr("height", d => this.y(d[0]) - this.y(d[1]))
+			.attr("height", d => 0 )
 			.attr("width", d => this.x.bandwidth())
 			.attr("fill", d => this.getFillScale()[d.datasetLabel](d.data.label))
 			.attr("stroke", d => this.options.accessibility ? this.colorScale[d.datasetLabel](d.data.label) : null)
 			.attr("stroke-width", Configuration.bars.default.strokeWidth)
-			.attr("stroke-opacity", d => this.options.accessibility ? 1 : 0);
+			.attr("stroke-opacity", d => this.options.accessibility ? 1 : 0)
+			.transition(animate ? this.getFillTransition() : this.getInstantTransition())
+				.attr("y", d => this.y(d[1]))
+				.attr("height", d => this.y(d[0]) - this.y(d[1]));
+
 	}
 
 	addDataPointEventListener() {
